@@ -32,9 +32,9 @@ var jsonResult = await response.Content.ReadAsStringAsync();
 var model = JsonConvert.DeserializeObject<WeatherModel>(jsonResult);
 Console.WriteLine();
 Console.WriteLine($"Город: {model.Name}");
-Console.WriteLine($"Температура: {((Math.Round(model.Main.Temp) < 0) ? Math.Round(model.Main.Temp) : $"+{Math.Round(model.Main.Temp)}")}°");
+Console.WriteLine($"Температура: {Math.Round(model.Main.Temp):+#;-#;0}°");
 Console.WriteLine($"На улице {model.Weather[0].Description}");
-Console.WriteLine($"Ощущается как: {Math.Round(model.Main.FeelsLike)}°");
+Console.WriteLine($"Ощущается как: {Math.Round(model.Main.FeelsLike):+#;-#;0}°");
 Console.WriteLine($"Ветер: {Math.Round(model.Wind.Speed, 1)} м/с, {GetDirection(model.Wind.Deg)}");
 Console.WriteLine($"Влажность: {model.Main.Humidity}%");
 Console.WriteLine($"Давление: {model.Main.Pressure} мм рт.ст.");
@@ -49,36 +49,37 @@ var modelDays = JsonConvert.DeserializeObject<WeatherModelDays>(jsonResult);
 Console.WriteLine("Прогноз погоды на следующие 4 дня\n");
 var firstPositionCursor = Console.GetCursorPosition();
 firstPositionCursor.Left = 18;
-Console.WriteLine($"Дата:");
-var secondtPositionCursor = Console.GetCursorPosition();
-Console.WriteLine($"День недели:");
-var thirtPositionCursor = Console.GetCursorPosition();
-Console.WriteLine($"Min, max °:");
+Console.WriteLine("Дата:");
+var secondPositionCursor = Console.GetCursorPosition();
+Console.WriteLine("День недели:");
+var thirdPositionCursor = Console.GetCursorPosition();
+Console.WriteLine("Min, max °:");
 var fourthPositionCursor = Console.GetCursorPosition();
-Console.WriteLine($"На улице будет");
+Console.WriteLine("На улице будет");
 
 var p = 0;
 for (; p < modelDays.List.Length; p++)
 {
     DateTime.TryParse(modelDays.List[p].DtTxt, out var date);
+    date = date.AddSeconds(modelDays.City.TimeZone);
     if (date.ToShortDateString() != DateTime.Today.ToShortDateString())
         break;
 }
 
-for (int i = p; i < modelDays.List.Length; i += 8)
+for (var i = p; i < modelDays.List.Length; i += 8)
 {
     var leftCursorPosition = firstPositionCursor.Left + (i - 1) / 8 * 25;
     DateTime.TryParse(modelDays.List[i].DtTxt, out var date);
     Console.SetCursorPosition(leftCursorPosition, firstPositionCursor.Top);
     Console.WriteLine($"{date.ToShortDateString()}");
-    Console.SetCursorPosition(leftCursorPosition, secondtPositionCursor.Top);
+    Console.SetCursorPosition(leftCursorPosition, secondPositionCursor.Top);
     Console.WriteLine($"{CultureInfo.GetCultureInfo("ru-RU").DateTimeFormat.GetDayName(date.DayOfWeek)}");
 
 
     var minTemp = modelDays.List[i].Main.TempMin;
     var maxTemp = modelDays.List[i].Main.TempMax;
 
-    for (int j = i; j < i + 8 && j < modelDays.List.Length; j++)
+    for (var j = i; j < i + 8 && j < modelDays.List.Length; j++)
     {
         if (modelDays.List[j].Main.TempMin < minTemp)
         {
@@ -90,8 +91,8 @@ for (int i = p; i < modelDays.List.Length; i += 8)
         }
     }
 
-    Console.SetCursorPosition(leftCursorPosition, thirtPositionCursor.Top);
-    Console.WriteLine($"{Math.Round(minTemp)}°, {Math.Round(maxTemp)}°");
+    Console.SetCursorPosition(leftCursorPosition, thirdPositionCursor.Top);
+    Console.WriteLine($" {Math.Round(minTemp):+#;-#;0}°, {Math.Round(maxTemp):+#;-#;0}°");
     Console.SetCursorPosition(leftCursorPosition, fourthPositionCursor.Top);
     Console.WriteLine($"{modelDays.List[i].Weather[0].Description}");
 }
