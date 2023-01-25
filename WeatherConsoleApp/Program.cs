@@ -17,18 +17,17 @@ var language = "ru";
 var uri = new Uri($"https://api.openweathermap.org/data/2.5/weather?q={HttpUtility.UrlEncode(city)}&appid={apiKey}&units={units}&lang={language}");
 var http = new HttpClient();
 var response = await http.GetAsync(uri);
+var jsonResult = await response.Content.ReadAsStringAsync();
 
 //обработка ошибки
 if (!response.IsSuccessStatusCode)
 {
-    var jsonResponse = await response.Content.ReadAsStringAsync();
-    var errorModel = JsonConvert.DeserializeObject<ErrorModel>(jsonResponse);
+    var errorModel = JsonConvert.DeserializeObject<ErrorModel>(jsonResult);
     Console.WriteLine($"Ошибка: {errorModel.Message}");
     return;
 }
 
 //Обработка и вывод текущей погоды
-var jsonResult = await response.Content.ReadAsStringAsync();
 var model = JsonConvert.DeserializeObject<WeatherModel>(jsonResult);
 Console.WriteLine();
 Console.WriteLine($"Город: {model.Name}");
@@ -41,12 +40,22 @@ Console.WriteLine($"Давление: {model.Main.Pressure} мм рт.ст.");
 Console.WriteLine();
 
 //Обработка и вывод погоды на 4 дня вперёд
+Console.WriteLine("Прогноз погоды на следующие 4 дня\n");
+
 uri = new Uri($"https://api.openweathermap.org/data/2.5/forecast?q={HttpUtility.UrlEncode(city)}&appid={apiKey}&units={units}&lang={language}");
 response = await http.GetAsync(uri);
 jsonResult = await response.Content.ReadAsStringAsync();
+
+//обработка ошибки
+if (!response.IsSuccessStatusCode)
+{
+    var errorModel = JsonConvert.DeserializeObject<ErrorModel>(jsonResult);
+    Console.WriteLine($"Ошибка: {errorModel.Message}");
+    return;
+}
+
 var modelDays = JsonConvert.DeserializeObject<WeatherModelDays>(jsonResult);
 
-Console.WriteLine("Прогноз погоды на следующие 4 дня\n");
 var firstPositionCursor = Console.GetCursorPosition();
 firstPositionCursor.Left = 18;
 Console.WriteLine("Дата:");
