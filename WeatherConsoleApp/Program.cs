@@ -108,24 +108,16 @@ for (var i = p; i < modelDays.List.Length; i += 8)
 
 Console.ReadKey();
 
-string GetDirection(int deg)
-{
-    if (deg >= 0 && deg < 22.5 || deg >= 337.5 && deg <= 360)
-        return "C";
-    if (deg >= 22.5 && deg < 67.5)
-        return "СВ";
-    if (deg >= 67.5 && deg < 112.5)
-        return "В";
-    if (deg >= 112.5 && deg < 157.5)
-        return "ЮВ";
-    if (deg >= 157.5 && deg < 202.5)
-        return "Ю";
-    if (deg >= 202.5 && deg < 247.5)
-        return "ЮЗ";
-    if (deg >= 247.5 && deg < 292.5)
-        return "З";
-    if (deg >= 292.5 && deg < 337.5)
-        return "СЗ";
-
-    return string.Empty;
-}
+string GetDirection(int deg) =>
+    deg switch
+    {
+        >= 0 and < 23 or >= 338 and <= 360 => "C",
+        >= 23 and < 68 => "СВ",
+        >= 68 and < 113 => "В",
+        >= 113 and < 158 => "ЮВ",
+        >= 158 and < 203 => "Ю",
+        >= 203 and < 248 => "ЮЗ",
+        >= 248 and < 292 => "З",
+        >= 292 and < 338 => "CЗ",
+        _ => "",
+    };
